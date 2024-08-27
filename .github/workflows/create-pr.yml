@@ -39,7 +39,7 @@ jobs:
 
       - name: Create PR in Application Repo
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.APP_REPO_PAT }}
         run: |
           REPO="preti14-m/application"
           curl -X POST https://api.github.com/repos/$REPO/pulls \

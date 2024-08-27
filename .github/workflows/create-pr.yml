@@ -18,7 +18,7 @@ jobs:
           GH_TOKEN: ${{ secrets.APP_REPO_PAT }}  # Use the PAT stored as a secret
         run: |
           # Define the repo where you want to create the PR
-          REPO="https://github.com/preti14-m/application"
+          REPO="preti14-m/application"
 
           # Get the latest commit message from the LZ-infra repo
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)

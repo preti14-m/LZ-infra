@@ -1,0 +1,52 @@
+name: Create PR in Application Repo
+
+on:
+  push:
+    branches:
+      - main  # Adjust to the branch you want to monitor
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the landing zone repo
+        uses: actions/checkout@v3
+
+      - name: Trigger PR in Application Repo
+        env:
+          GH_TOKEN: ${{ secrets.APP_REPO_PAT }}  # Use the PAT stored as a secret
+        run: |
+          # Define the repo where you want to create the PR
+          REPO="https://github.com/preti14-m/application"
+
+          # Get the latest commit message from the LZ-infra repo
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+
+          # Generate a branch name based on the timestamp
+          BRANCH_NAME="lz-sync-$(date +%s)"
+
+          # Clone the application repo
+          git clone https://github.com/$REPO.git
+          cd application
+
+          # Create a new branch in the application repo
+          git checkout -b "$BRANCH_NAME"
+
+          # Optionally, make changes to the application repo here if needed
+          # For example, copying config files from LZ-infra to application repo
+
+          # Commit and push the new branch
+          git commit --allow-empty -m "Sync from LZ-infra: $COMMIT_MESSAGE"
+          git push origin "$BRANCH_NAME"
+
+          # Create a PR using the GitHub API
+          curl -X POST https://api.github.com/repos/$REPO/pulls \
+            -H "Authorization: token ${{ env.GH_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d '{
+              "title": "Sync from LZ-infra",
+              "head": "'"$BRANCH_NAME"'",
+              "base": "main",
+              "body": "Automated PR created from changes in the LZ-infra repository."
+            }'

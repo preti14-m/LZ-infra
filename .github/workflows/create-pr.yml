@@ -21,7 +21,7 @@ jobs:
       - name: Make changes (ensure files are copied or created)
         run: |
           # Example: Copying files from LZ-infra to application repo
-          cp -r ../LZ-infra/README.md .
+          cp ../LZ-infra/test.html .
 
       - name: Verify files and commit
         run: |

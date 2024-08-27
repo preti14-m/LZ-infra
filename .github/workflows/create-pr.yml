@@ -38,16 +38,10 @@ jobs:
           fi
 
       - name: Create PR in Application Repo
-        env:
-          GH_TOKEN: ${{ secrets.APP_REPO_PAT }}
-        run: |
-          REPO="preti14-m/application"
-          curl -X POST https://api.github.com/repos/$REPO/pulls \
-            -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -d '{
-              "title": "Sync from LZ-infra",
-              "head": "'"$BRANCH_NAME"'",
-              "base": "main",
-              "body": "Automated PR created from LZ-infra changes."
-            }'
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.APP_REPO_PAT }}
+          base: main
+          head: sync-from-lz-infra
+          title: 'Automated PR: Sync changes from LZ-infra'
+          body: 'This PR is automatically created to sync changes from the LZ-infra repo.'

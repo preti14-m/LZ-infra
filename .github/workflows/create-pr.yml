@@ -44,7 +44,8 @@ jobs:
 
           # Optionally, make changes to the application repo here if needed
           # For example, copying config files from LZ-infra to application repo
-
+          - name: List files in the repo
+              run: ls -al
           # Commit and push the new branch
           git add .
           git commit -m "Sync from LZ-infra: $COMMIT_MESSAGE"

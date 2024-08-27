@@ -13,6 +13,11 @@ jobs:
       - name: Checkout the landing zone repo
         uses: actions/checkout@v3
 
+      - name: Set up Git configuration
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
       - name: Trigger PR in Application Repo
         env:
           GH_TOKEN: ${{ secrets.APP_REPO_PAT }}  # Use the PAT stored as a secret
@@ -29,6 +34,10 @@ jobs:
           # Clone the application repo
           git clone https://github.com/$REPO.git
           cd application
+
+          # Set up Git configuration
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
 
           # Create a new branch in the application repo
           git checkout -b "$BRANCH_NAME"

@@ -1,47 +1,39 @@
 name: Create PR in Application Repo
-
 on:
   push:
     branches:
-      - main  # Adjust to the branch you want to monitor
+      - main  # or the branch you want to monitor
 
 jobs:
-  create-pr:
+  sync:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the landing zone repo
-        uses: actions/checkout@v3
+    - name: Checkout LZ-infra repo
+      uses: actions/checkout@v3
 
-      - name: Set up Git configuration
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+    - name: Checkout Application repo
+      uses: actions/checkout@v3
+      with:
+        repository: preti14-m/application
+        token: ${{ secrets.APP_REPO_PAT }}
+        path: application-repo
 
-      - name: Make changes (ensure files are copied or created)
-        run: |
-          # Example: Copying files from LZ-infra to application repo
-          echo "Hello world"
+    - name: Sync Changes
+      run: |
+        cp -r . application-repo/
+        cd application-repo
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add .
+        git commit -m "Sync changes from LZ-infra repo"
+        git push origin main
 
-      - name: Verify files and commit
-        run: |
-          # List files to ensure changes are present
-          ls -al
-          
-          # Ensure we have files to commit
-          if [ -n "$(git status --porcelain)" ]; then
-            git add .
-            git commit -m "Sync from LZ-infra: $COMMIT_MESSAGE" || echo "No changes to commit"
-            git push origin "$BRANCH_NAME"
-          else
-            echo "No files to commit"
-          fi
-
-      - name: Create PR in Application Repo
-        uses: peter-evans/create-pull-request@v3
-        with:
-          token: ${{ secrets.APP_REPO_PAT }}
-          base: main
-          head: sync-from-lz-infra
-          title: 'Automated PR: Sync changes from LZ-infra'
-          body: 'This PR is automatically created to sync changes from the LZ-infra repo.'
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        token: ${{ secrets.APP_REPO_PAT }}
+        base: main
+        head: sync-from-lz-infra
+        title: 'Automated PR: Sync changes from LZ-infra'
+        body: 'This PR is automatically created to sync changes from the LZ-infra repo.'

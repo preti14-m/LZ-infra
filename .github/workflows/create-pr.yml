@@ -18,46 +18,36 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-      - name: Make changes and push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the token stored as a secret
+      - name: Make changes (ensure files are copied or created)
         run: |
-          # Define the repo where you want to create the PR
+          # Example: Copying files from LZ-infra to application repo
+          cp -r ../LZ-infra/README.md .
+
+      - name: Verify files and commit
+        run: |
+          # List files to ensure changes are present
+          ls -al
+          
+          # Ensure we have files to commit
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "Sync from LZ-infra: $COMMIT_MESSAGE" || echo "No changes to commit"
+            git push origin "$BRANCH_NAME"
+          else
+            echo "No files to commit"
+          fi
+
+      - name: Create PR in Application Repo
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
           REPO="preti14-m/application"
-
-          # Get the latest commit message from the LZ-infra repo
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-
-          # Generate a branch name based on the timestamp
-          BRANCH_NAME="lz-sync-$(date +%s)"
-
-          # Clone the application repo
-          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$REPO.git
-          cd application
-
-          # Set up Git configuration
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-
-          # Create a new branch in the application repo
-          git checkout -b "$BRANCH_NAME"
-
-          # Optionally, make changes to the application repo here if needed
-          # For example, copying config files from LZ-infra to application repo
-          - name: List files in the repo
-              run: ls -al
-          # Commit and push the new branch
-          git add .
-          git commit -m "Sync from LZ-infra: $COMMIT_MESSAGE"
-          git push origin "$BRANCH_NAME"
-
-          # Create a PR using the GitHub API
           curl -X POST https://api.github.com/repos/$REPO/pulls \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             -d '{
               "title": "Sync from LZ-infra",
               "head": "'"$BRANCH_NAME"'",
               "base": "main",
-              "body": "Automated PR created from changes in the LZ-infra repository."
+              "body": "Automated PR created from LZ-infra changes."
             }'

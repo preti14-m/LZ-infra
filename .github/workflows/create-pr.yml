@@ -14,6 +14,6 @@ jobs:
 
       - name: Create Pull Request
         run: |
-          gh pr create --base "update-from-infra" --head "update-from-infra" --title "Automated PR" --body "Automated pull request from infra repo" --repo preti14-m/application
+          gh pr create --base main --head "update-from-application-20240830-094405" --title "Automated PR" --body "Automated pull request from infra repo" --repo preti14-m/application
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
